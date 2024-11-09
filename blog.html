@@ -3,78 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog - My Personal Website</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>portfolio</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Helvetica', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        nav {
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 1.5rem;
+            text-transform: lowercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        
+        nav a:hover {
+            text-decoration: underline;
+        }
+        
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .blog-item {
+            border: 1px solid #333;
+            padding: 1.5rem;
+        }
+        
+        .blog-item h2 {
+            font-size: 1.2rem;
+            font-weight: normal;
+            margin: 0 0 1rem 0;
+            text-transform: lowercase;
+        }
+        
+        .blog-item p {
+            font-size: 0.9rem;
+            margin: 0;
+            color: #999;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="blog.html">Blog</a></li>
-                <li><a href="portfolio.html">Portfolio</a></li>
-                <li><a href="social.html">Social Media</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
-    </header>
-
+    <nav>
+        <a href="about.html">about</a>
+        <a href="work.html">work</a>
+        <a href="explore.html">explore</a>
+        <a href="contact.html">contact</a>
+    </nav>
+    
     <main>
-        <section id="blog-posts">
-            <h1>Blog Posts</h1>
-            <div class="grid-container">
-                <div class="grid-item">
-                    <a href="post1.html">
-                        <img src="https://via.placeholder.com/300x200" alt="Blog Post 1">
-                        <h3>Blog Post Title 1</h3>
-                        <p>A brief description of blog post 1 goes here.</p>
-                    </a>
-                </div>
-                <div class="grid-item">
-                    <a href="post2.html">
-                        <img src="https://via.placeholder.com/300x200" alt="Blog Post 2">
-                        <h3>Blog Post Title 2</h3>
-                        <p>A brief description of blog post 2 goes here.</p>
-                    </a>
-                </div>
-                <div class="grid-item">
-                    <a href="post3.html">
-                        <img src="https://via.placeholder.com/300x200" alt="Blog Post 3">
-                        <h3>Blog Post Title 3</h3>
-                        <p>A brief description of blog post 3 goes here.</p>
-                    </a>
-                </div>
-                <div class="grid-item">
-                    <a href="post4.html">
-                        <img src="https://via.placeholder.com/300x200" alt="Blog Post 4">
-                        <h3>Blog Post Title 4</h3>
-                        <p>A brief description of blog post 4 goes here.</p>
-                    </a>
-                </div>
-                <div class="grid-item">
-                    <a href="post5.html">
-                        <img src="https://via.placeholder.com/300x200" alt="Blog Post 5">
-                        <h3>Blog Post Title 5</h3>
-                        <p>A brief description of blog post 5 goes here.</p>
-                    </a>
-                </div>
-                <div class="grid-item">
-                    <a href="post6.html">
-                        <img src="https://via.placeholder.com/300x200" alt="Blog Post 6">
-                        <h3>Blog Post Title 6</h3>
-                        <p>A brief description of blog post 6 goes here.</p>
-                    </a>
-                </div>
+        <div class="blog-grid">
+            <div class="blog-item">
+                <h2>thoughts on minimalism</h2>
+                <p>exploring the beauty of simplicity in design</p>
             </div>
-        </section>
+            <div class="blog-item">
+                <h2>recent projects</h2>
+                <p>a look at my latest work and experiments</p>
+            </div>
+            <div class="blog-item">
+                <h2>creative process</h2>
+                <p>insights into my design methodology</p>
+            </div>
+        </div>
     </main>
-
-    <footer>
-        <p>&copy; 2023 My Personal Website. All rights reserved.</p>
-    </footer>
-
-    <script src="script.js"></script>
 </body>
 </html>
