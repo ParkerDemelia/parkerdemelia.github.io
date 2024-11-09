@@ -160,3 +160,82 @@ footer {
     background: #35424a;
     color: #ffffff;
 }
+#logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+    text-shadow: 0px 0px 3px white;
+    font-family: monospace;
+    animation-duration:1s;
+    animation-name: colorthing;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    }
+    @keyframes colorthing {
+    from {
+        color: rgb(0, 255, 0);
+    }
+    to {
+        color: rgb(0, 200, 0);
+    }
+
+}
+
+
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Helvetica', sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+nav {
+    padding: 2rem;
+    text-align: center;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 1.5rem;
+    text-transform: lowercase;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.blog-item {
+    border: 1px solid #333;
+    padding: 1.5rem;
+}
+
+.blog-item h2 {
+    font-size: 1.2rem;
+    font-weight: normal;
+    margin: 0 0 1rem 0;
+    text-transform: lowercase;
+}
+
+.blog-item p {
+    font-size: 0.9rem;
+    margin: 0;
+    color: #999;
+}
