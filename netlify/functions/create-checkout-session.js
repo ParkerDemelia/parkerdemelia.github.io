@@ -26,6 +26,7 @@ exports.handler = async function(event, context) {
     }
 
     try {
+        console.log('Received request body:', event.body);
         const { line_items } = JSON.parse(event.body);
 
         if (!line_items || line_items.length === 0) {
@@ -35,6 +36,8 @@ exports.handler = async function(event, context) {
                 body: JSON.stringify({ error: 'No items provided' })
             };
         }
+
+        console.log('Creating checkout session with line items:', line_items);
 
         // Create Stripe Checkout Session
         const session = await stripe.checkout.sessions.create({
@@ -67,23 +70,27 @@ exports.handler = async function(event, context) {
                         }
                     }
                 }
-            ]
+            ],
+            allow_quantity_adjustments: true
         });
+
+        console.log('Created session:', session.id);
 
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
-                clientSecret: session.client_secret
+                url: session.url
             })
         };
     } catch (error) {
-        console.error('Stripe error:', error);
+        console.error('Stripe error details:', error);
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
-                error: error.message || 'Internal server error'
+                error: error.message || 'Internal server error',
+                details: error.stack
             })
         };
     }

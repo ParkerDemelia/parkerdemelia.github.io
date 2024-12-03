@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Merch - Parker Demelia</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="header.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
@@ -81,15 +82,6 @@
         .merch-container {
             display: none;
             padding: 2rem;
-        }
-
-        #checkout {
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 1rem auto;
-            max-width: 800px;
         }
 
         .product-grid {
@@ -284,66 +276,10 @@
                     <button class="buy-button" onclick="addToCart('hat')">Add to Cart</button>
                 </div>
             </div>
-            
-            <!-- Checkout will be mounted here -->
-            <div id="checkout"></div>
         </div>
     </main>
 
     <script>
-        // Check if password is already verified
-        function checkStoredPassword() {
-            const isVerified = localStorage.getItem('passwordVerified');
-            if (isVerified === 'true') {
-                document.getElementById('password-screen').style.display = 'none';
-                document.getElementById('merch-container').style.display = 'block';
-            }
-        }
-
-        // Run on page load
-        checkStoredPassword();
-
-        // Countdown Timer
-        function updateCountdown() {
-            const targetDate = new Date('2025-01-01T00:00:00');
-            const now = new Date();
-            const difference = targetDate - now;
-
-            if (difference <= 0) {
-                document.getElementById('countdown').innerHTML = '<h3>DROP IS LIVE!</h3>';
-                return;
-            }
-
-            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-            document.getElementById('days').textContent = days.toString().padStart(2, '0');
-            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
-        }
-
-        // Update countdown every second
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
-
-        // Password protection
-        function checkPassword() {
-            const password = document.getElementById('password-input').value;
-            const correctHash = '58d54e7c7553ce1fd758e8710a6a249e059578aead259fdf21a3fbd755be8129';
-            const inputHash = CryptoJS.SHA256(password).toString();
-            
-            if (inputHash === correctHash) {
-                localStorage.setItem('passwordVerified', 'true');
-                document.getElementById('password-screen').style.display = 'none';
-                document.getElementById('merch-container').style.display = 'block';
-            } else {
-                alert('Incorrect password');
-            }
-        }
-
         // Initialize Stripe
         const stripe = Stripe('pk_live_51QRbdOLpJVbSldTtLZ3vJDIcn5sMJgMLPgiepsnXpUhOL0HaPp4sMk0Dpd6cdNbWix85au0V8INgxXXHqAlgfnQq000y5XkZGB');
 
@@ -353,19 +289,19 @@
                 name: 'Embroidered Hat',
                 price: 25.00,
                 image: 'placeholder-hat.jpg',
-                priceId: 'price_1QRgCbLpJVbSldTtRLAuVC49' // Replace with your actual Stripe price ID
+                priceId: 'price_1QRgCbLpJVbSldTtRLAuVC49'
             },
             'sweatshirt': {
                 name: 'Limited Edition Sweatshirt',
                 price: 60.00,
                 image: 'placeholder-sweatshirt.jpg',
-                priceId: 'price_2OqRbdOLpJVbSldTtLZ3vJDI' // Replace with your actual Stripe price ID
+                priceId: 'price_2OqRbdOLpJVbSldTtLZ3vJDI'
             },
             'tshirt': {
                 name: 'Classic T-Shirt',
                 price: 30.00,
                 image: 'placeholder-tshirt.jpg',
-                priceId: 'price_3OqRbdOLpJVbSldTtLZ3vJDI' // Replace with your actual Stripe price ID
+                priceId: 'price_3OqRbdOLpJVbSldTtLZ3vJDI'
             }
         };
 
@@ -396,7 +332,6 @@
             let total = 0;
             let itemCount = 0;
 
-            // Update cart items
             cartItems.innerHTML = Object.entries(cart).map(([type, quantity]) => {
                 const product = products[type];
                 const itemTotal = product.price * quantity;
@@ -419,11 +354,8 @@
                 `;
             }).join('');
 
-            // Update cart count and total
             cartCount.textContent = itemCount;
             document.getElementById('cart-total').textContent = total.toFixed(2);
-
-            // Save cart to localStorage
             localStorage.setItem('cart', JSON.stringify(cart));
         }
 
@@ -438,7 +370,6 @@
                 return;
             }
 
-            // Show loading state
             const loadingOverlay = document.createElement('div');
             loadingOverlay.style.cssText = `
                 position: fixed;
@@ -456,13 +387,18 @@
             document.body.appendChild(loadingOverlay);
 
             try {
-                // Create line items from cart
                 const line_items = Object.entries(cart).map(([type, quantity]) => ({
                     price: products[type].priceId,
-                    quantity: quantity
+                    quantity: quantity,
+                    adjustable_quantity: {
+                        enabled: true,
+                        minimum: 1,
+                        maximum: 10
+                    }
                 }));
 
-                // Call Netlify Function to create checkout session
+                console.log('Sending line items:', line_items);
+
                 const response = await fetch('/.netlify/functions/create-checkout-session', {
                     method: 'POST',
                     headers: {
@@ -471,31 +407,80 @@
                     body: JSON.stringify({ line_items })
                 });
 
+                const responseData = await response.json();
+                console.log('Response:', responseData);
+
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.message || 'Failed to create checkout session');
+                    throw new Error(responseData.error || 'Network response was not ok');
                 }
 
-                const { clientSecret } = await response.json();
-                
-                // Redirect to Stripe Checkout
-                const { error } = await stripe.redirectToCheckout({
-                    clientSecret
-                });
-
-                if (error) {
-                    throw error;
+                if (!responseData.url) {
+                    throw new Error('No checkout URL received from server');
                 }
+
+                window.location.href = responseData.url;
 
             } catch (error) {
-                console.error('Checkout error:', error);
-                alert('Sorry, there was a problem starting checkout. Please try again.');
+                console.error('Detailed checkout error:', error);
+                alert('Sorry, there was a problem starting checkout: ' + error.message);
             } finally {
                 loadingOverlay.remove();
             }
         }
 
-        // Load cart from localStorage on page load
+        // Password protection
+        function checkPassword() {
+            const password = document.getElementById('password-input').value;
+            const correctHash = '58d54e7c7553ce1fd758e8710a6a249e059578aead259fdf21a3fbd755be8129';
+            const inputHash = CryptoJS.SHA256(password).toString();
+            
+            if (inputHash === correctHash) {
+                localStorage.setItem('passwordVerified', 'true');
+                document.getElementById('password-screen').style.display = 'none';
+                document.getElementById('merch-container').style.display = 'block';
+            } else {
+                alert('Incorrect password');
+            }
+        }
+
+        // Countdown Timer
+        function updateCountdown() {
+            const targetDate = new Date('2025-01-01T00:00:00');
+            const now = new Date();
+            const difference = targetDate - now;
+
+            if (difference <= 0) {
+                document.getElementById('countdown').innerHTML = '<h3>DROP IS LIVE!</h3>';
+                return;
+            }
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+
+        // Initialize
+        function init() {
+            checkStoredPassword();
+            loadCart();
+            setInterval(updateCountdown, 1000);
+            updateCountdown();
+        }
+
+        function checkStoredPassword() {
+            const isVerified = localStorage.getItem('passwordVerified');
+            if (isVerified === 'true') {
+                document.getElementById('password-screen').style.display = 'none';
+                document.getElementById('merch-container').style.display = 'block';
+            }
+        }
+
         function loadCart() {
             const savedCart = localStorage.getItem('cart');
             if (savedCart) {
@@ -504,15 +489,8 @@
             }
         }
 
-        // Initialize cart
-        loadCart();
-
-        // Update buy buttons to add to cart instead of direct checkout
-        document.querySelectorAll('.buy-button').forEach(button => {
-            const productType = button.getAttribute('onclick').match(/'(.+?)'/)[1];
-            button.setAttribute('onclick', `addToCart('${productType}')`);
-            button.textContent = 'Add to Cart';
-        });
+        // Start the app
+        init();
     </script>
 </body>
 </html> 
