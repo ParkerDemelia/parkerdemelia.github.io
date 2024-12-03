@@ -4,31 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
+    <script src="header.js"></script>
     <title>portfolio</title>
+    <style>
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+
+        .column {
+            flex: 1;
+            margin: 0 1rem;
+            text-align: center;
+        }
+
+        .column p {
+            margin: 0.5rem 0;
+        }
+
+        .column a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .column a:hover {
+            color: #ff6f61;
+        }
+    </style>
 </head>
 <body>
-    <nav>
-        <a id="logo" href="index.html">parker demelia</a><br><br>
-        <a href="about.html">about</a>
-        <a href="work.html">work</a>
-        <a href="blog.html">blog</a>
-        <a href="explore.html">explore</a>
-        <a href="contact.html">contact</a>
-    </nav>
-    
     <main>
-        <div class="blog-grid">
-            <div class="blog-item">
-                <h2>thoughts on minimalism</h2>
-                <p>exploring the beauty of simplicity in design</p>
+        <div class="row">
+            <div class="column">
+                <p>outer workings</p>
+                <a href="https://www.youtube.com/watch?v=NmGgea4itv8"><p>backpacking the white mountains</p></a>
             </div>
-            <div class="blog-item">
-                <h2>recent projects</h2>
-                <p>a look at my latest work and experiments</p>
+            <div class="column">
+                <p>inner thoughts</p>
+                <a href="https://www.youtube.com/watch?v=NmGgea4itv8"><p>ideal routine</p></a>
             </div>
-            <div class="blog-item">
-                <h2>creative process</h2>
-                <p>insights into my design methodology</p>
+            <div class="column">
+                <p>cool shit</p>
+                <a href="https://www.youtube.com/watch?v=NmGgea4itv8"><p>backpacking the white mountains</p></a>
             </div>
         </div>
     </main>
