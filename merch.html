@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merch - Parker Demelia</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        .password-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+        }
+        
+        .password-form {
+            background: #111;
+            padding: 2rem;
+            border: 1px solid #333;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .password-form input {
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .password-form button {
+            background: #ff6f61;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .password-form button:hover {
+            background: #ff8577;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            letter-spacing: 2px;
+        }
+
+        .countdown {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .countdown-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .countdown-item span {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .countdown-item .label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+            opacity: 0.7;
+        }
+
+        .merch-container {
+            display: none;
+            padding: 2rem;
+        }
+
+        #checkout {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem auto;
+            max-width: 800px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .product-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-card img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 1rem;
+        }
+
+        .buy-button {
+            background: #ff6f61;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .buy-button:hover {
+            background: #ff8577;
+        }
+
+        .cart-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff6f61;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cart-count {
+            background: #fff;
+            color: #000;
+            padding: 0.2rem 0.5rem;
+            border-radius: 50%;
+            font-size: 0.8rem;
+        }
+
+        .cart-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100vh;
+            background: #111;
+            border-left: 1px solid #333;
+            padding: 2rem;
+            transition: transform 0.3s ease;
+            z-index: 999;
+            overflow-y: auto;
+            transform: translateX(100%);
+        }
+
+        .cart-panel.active {
+            transform: translateX(0);
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .cart-item-info {
+            flex-grow: 1;
+            padding: 0 1rem;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quantity-btn {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .cart-total {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #333;
+            text-align: right;
+        }
+
+        @media (max-width: 768px) {
+            .cart-panel {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html">back</a>
+    </nav>
+
+    <div class="cart-icon" onclick="toggleCart()">
+        🛒 Cart <span class="cart-count">0</span>
+    </div>
+
+    <div class="cart-panel" id="cart-panel">
+        <h2>Shopping Cart</h2>
+        <div id="cart-items"></div>
+        <div class="cart-total">
+            <h3>Total: $<span id="cart-total">0.00</span></h3>
+            <button class="buy-button" onclick="checkout()">Checkout</button>
+        </div>
+    </div>
+
+    <main>
+        <div id="password-screen" class="password-screen">
+            <div class="password-form">
+                <h1>MERCH DROP</h1>
+                <div id="countdown" class="countdown">
+                    <div class="countdown-item">
+                        <span id="days">00</span>
+                        <span class="label">days</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span id="hours">00</span>
+                        <span class="label">hours</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span id="minutes">00</span>
+                        <span class="label">minutes</span>
+                    </div>
+                    <div class="countdown-item">
+                        <span id="seconds">00</span>
+                        <span class="label">seconds</span>
+                    </div>
+                </div>
+                <h2>Enter Password</h2>
+                <input type="password" id="password-input" placeholder="Password">
+                <button onclick="checkPassword()">Enter</button>
+            </div>
+        </div>
+
+        <div id="merch-container" class="merch-container">
+            <div class="product-grid">
+                <div class="product-card">
+                    <img src="placeholder-sweatshirt.jpg" alt="Sweatshirt">
+                    <h3>Limited Edition Sweatshirt</h3>
+                    <p>$60.00</p>
+                    <button class="buy-button" onclick="addToCart('sweatshirt')">Add to Cart</button>
+                </div>
+
+                <div class="product-card">
+                    <img src="placeholder-tshirt.jpg" alt="T-Shirt">
+                    <h3>Classic T-Shirt</h3>
+                    <p>$30.00</p>
+                    <button class="buy-button" onclick="addToCart('tshirt')">Add to Cart</button>
+                </div>
+
+                <div class="product-card">
+                    <img src="placeholder-hat.jpg" alt="Hat">
+                    <h3>Embroidered Hat</h3>
+                    <p>$25.00</p>
+                    <button class="buy-button" onclick="addToCart('hat')">Add to Cart</button>
+                </div>
+            </div>
+            
+            <!-- Checkout will be mounted here -->
+            <div id="checkout"></div>
+        </div>
+    </main>
+
+    <script>
+        // Check if password is already verified
+        function checkStoredPassword() {
+            const isVerified = localStorage.getItem('passwordVerified');
+            if (isVerified === 'true') {
+                document.getElementById('password-screen').style.display = 'none';
+                document.getElementById('merch-container').style.display = 'block';
+            }
+        }
+
+        // Run on page load
+        checkStoredPassword();
+
+        // Countdown Timer
+        function updateCountdown() {
+            const targetDate = new Date('2025-01-01T00:00:00');
+            const now = new Date();
+            const difference = targetDate - now;
+
+            if (difference <= 0) {
+                document.getElementById('countdown').innerHTML = '<h3>DROP IS LIVE!</h3>';
+                return;
+            }
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+
+        // Update countdown every second
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Password protection
+        function checkPassword() {
+            const password = document.getElementById('password-input').value;
+            const correctHash = '58d54e7c7553ce1fd758e8710a6a249e059578aead259fdf21a3fbd755be8129';
+            const inputHash = CryptoJS.SHA256(password).toString();
+            
+            if (inputHash === correctHash) {
+                localStorage.setItem('passwordVerified', 'true');
+                document.getElementById('password-screen').style.display = 'none';
+                document.getElementById('merch-container').style.display = 'block';
+            } else {
+                alert('Incorrect password');
+            }
+        }
+
+        // Initialize Stripe
+        const stripe = Stripe('pk_live_51QRbdOLpJVbSldTtLZ3vJDIcn5sMJgMLPgiepsnXpUhOL0HaPp4sMk0Dpd6cdNbWix85au0V8INgxXXHqAlgfnQq000y5XkZGB');
+
+        // Payment Links
+        const PAYMENT_LINKS = {
+            'hat': 'https://buy.stripe.com/00g29BbLQdQx9a0000'  // Your existing hat link
+            // Add other product links when you have them
+        };
+
+        function startCheckout(productType) {
+            const checkoutDiv = document.getElementById('checkout');
+            const paymentLink = PAYMENT_LINKS[productType];
+
+            if (!paymentLink) {
+                checkoutDiv.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #ff6f61;">
+                        <p>This product is not available for purchase yet.</p>
+                    </div>
+                `;
+                checkoutDiv.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            // Show loading state
+            checkoutDiv.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <p>Loading checkout...</p>
+                </div>
+            `;
+
+            // Scroll to checkout
+            checkoutDiv.scrollIntoView({ behavior: 'smooth' });
+
+            // Load the payment link in a new window
+            window.location.href = paymentLink;
+        }
+
+        // Shopping cart functionality
+        let cart = {};
+        const products = {
+            'hat': {
+                name: 'Embroidered Hat',
+                price: 25.00,
+                image: 'placeholder-hat.jpg',
+                paymentLink: 'https://buy.stripe.com/00g29BbLQdQx9a0000'
+            },
+            'sweatshirt': {
+                name: 'Limited Edition Sweatshirt',
+                price: 60.00,
+                image: 'placeholder-sweatshirt.jpg',
+                paymentLink: '' // Add your payment link when ready
+            },
+            'tshirt': {
+                name: 'Classic T-Shirt',
+                price: 30.00,
+                image: 'placeholder-tshirt.jpg',
+                paymentLink: '' // Add your payment link when ready
+            }
+        };
+
+        function addToCart(productType) {
+            if (!cart[productType]) {
+                cart[productType] = 0;
+            }
+            cart[productType]++;
+            updateCartUI();
+        }
+
+        function removeFromCart(productType) {
+            if (cart[productType] > 0) {
+                cart[productType]--;
+                if (cart[productType] === 0) {
+                    delete cart[productType];
+                }
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cartItems = document.getElementById('cart-items');
+            const cartCount = document.querySelector('.cart-count');
+            let total = 0;
+            let itemCount = 0;
+
+            // Update cart items
+            cartItems.innerHTML = Object.entries(cart).map(([type, quantity]) => {
+                const product = products[type];
+                const itemTotal = product.price * quantity;
+                total += itemTotal;
+                itemCount += quantity;
+                
+                return `
+                    <div class="cart-item">
+                        <img src="${product.image}" alt="${product.name}" style="width: 50px; height: 50px; object-fit: cover;">
+                        <div class="cart-item-info">
+                            <h4>${product.name}</h4>
+                            <p>$${product.price.toFixed(2)}</p>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="removeFromCart('${type}')">-</button>
+                            <span>${quantity}</span>
+                            <button class="quantity-btn" onclick="addToCart('${type}')">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Update cart count and total
+            cartCount.textContent = itemCount;
+            document.getElementById('cart-total').textContent = total.toFixed(2);
+
+            // Save cart to localStorage
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        function toggleCart() {
+            const cartPanel = document.getElementById('cart-panel');
+            cartPanel.classList.toggle('active');
+        }
+
+        async function checkout() {
+            if (Object.keys(cart).length === 0) {
+                alert('Your cart is empty');
+                return;
+            }
+
+            // Show loading state
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1001;
+            `;
+            loadingOverlay.innerHTML = '<p style="color: white;">Preparing checkout...</p>';
+            document.body.appendChild(loadingOverlay);
+
+            try {
+                // Create line items from cart
+                const lineItems = Object.entries(cart).map(([type, quantity]) => ({
+                    price: products[type].priceId,
+                    quantity: quantity
+                }));
+
+                // Call Netlify Function to create checkout session
+                const response = await fetch('/.netlify/functions/create-checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ lineItems })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to create checkout session');
+                }
+
+                const { url } = await response.json();
+                window.location.href = url;
+
+            } catch (error) {
+                console.error('Checkout error:', error);
+                alert('Sorry, there was a problem starting checkout. Please try again.');
+            } finally {
+                loadingOverlay.remove();
+            }
+        }
+
+        // Load cart from localStorage on page load
+        function loadCart() {
+            const savedCart = localStorage.getItem('cart');
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+                updateCartUI();
+            }
+        }
+
+        // Initialize cart
+        loadCart();
+
+        // Update buy buttons to add to cart instead of direct checkout
+        document.querySelectorAll('.buy-button').forEach(button => {
+            const productType = button.getAttribute('onclick').match(/'(.+?)'/)[1];
+            button.setAttribute('onclick', `addToCart('${productType}')`);
+            button.textContent = 'Add to Cart';
+        });
+    </script>
+</body>
+</html> 
