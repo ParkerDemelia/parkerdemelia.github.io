@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
         <a href="blog.html">blog</a>
         <a href="explore.html">explore</a>
         <a href="merch.html">merch</a>
-        <a href="contact.html">contact</a>
     `;
     document.body.insertBefore(nav, document.body.firstChild);
 }); 

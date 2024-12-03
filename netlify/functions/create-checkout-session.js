@@ -36,23 +36,38 @@ exports.handler = async function(event, context) {
             };
         }
 
-        // Validate line items
-        for (const item of line_items) {
-            if (!item.price || !item.quantity) {
-                return {
-                    statusCode: 400,
-                    headers,
-                    body: JSON.stringify({ error: 'Invalid line item format' })
-                };
-            }
-        }
-
+        // Create Stripe Checkout Session
         const session = await stripe.checkout.sessions.create({
-            line_items,
+            payment_method_types: ['card'],
+            line_items: line_items,
             mode: 'payment',
             success_url: `${event.headers.origin}/success.html`,
             cancel_url: `${event.headers.origin}/merch.html`,
-            ui_mode: 'embedded'
+            shipping_address_collection: {
+                allowed_countries: ['US']
+            },
+            shipping_options: [
+                {
+                    shipping_rate_data: {
+                        type: 'fixed_amount',
+                        fixed_amount: {
+                            amount: 500,
+                            currency: 'usd',
+                        },
+                        display_name: 'Standard Shipping',
+                        delivery_estimate: {
+                            minimum: {
+                                unit: 'business_day',
+                                value: 5,
+                            },
+                            maximum: {
+                                unit: 'business_day',
+                                value: 7,
+                            },
+                        }
+                    }
+                }
+            ]
         });
 
         return {

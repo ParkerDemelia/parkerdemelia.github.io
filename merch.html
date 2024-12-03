@@ -347,62 +347,30 @@
         // Initialize Stripe
         const stripe = Stripe('pk_live_51QRbdOLpJVbSldTtLZ3vJDIcn5sMJgMLPgiepsnXpUhOL0HaPp4sMk0Dpd6cdNbWix85au0V8INgxXXHqAlgfnQq000y5XkZGB');
 
-        // Payment Links
-        const PAYMENT_LINKS = {
-            'hat': 'https://buy.stripe.com/00g29BbLQdQx9a0000'  // Your existing hat link
-            // Add other product links when you have them
-        };
-
-        function startCheckout(productType) {
-            const checkoutDiv = document.getElementById('checkout');
-            const paymentLink = PAYMENT_LINKS[productType];
-
-            if (!paymentLink) {
-                checkoutDiv.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: #ff6f61;">
-                        <p>This product is not available for purchase yet.</p>
-                    </div>
-                `;
-                checkoutDiv.scrollIntoView({ behavior: 'smooth' });
-                return;
-            }
-
-            // Show loading state
-            checkoutDiv.innerHTML = `
-                <div style="text-align: center; padding: 2rem;">
-                    <p>Loading checkout...</p>
-                </div>
-            `;
-
-            // Scroll to checkout
-            checkoutDiv.scrollIntoView({ behavior: 'smooth' });
-
-            // Load the payment link in a new window
-            window.location.href = paymentLink;
-        }
-
-        // Shopping cart functionality
-        let cart = {};
+        // Product definitions
         const products = {
             'hat': {
                 name: 'Embroidered Hat',
                 price: 25.00,
                 image: 'placeholder-hat.jpg',
-                paymentLink: 'https://buy.stripe.com/00g29BbLQdQx9a0000'
+                priceId: 'price_1QRgCbLpJVbSldTtRLAuVC49' // Replace with your actual Stripe price ID
             },
             'sweatshirt': {
                 name: 'Limited Edition Sweatshirt',
                 price: 60.00,
                 image: 'placeholder-sweatshirt.jpg',
-                paymentLink: '' // Add your payment link when ready
+                priceId: 'price_2OqRbdOLpJVbSldTtLZ3vJDI' // Replace with your actual Stripe price ID
             },
             'tshirt': {
                 name: 'Classic T-Shirt',
                 price: 30.00,
                 image: 'placeholder-tshirt.jpg',
-                paymentLink: '' // Add your payment link when ready
+                priceId: 'price_3OqRbdOLpJVbSldTtLZ3vJDI' // Replace with your actual Stripe price ID
             }
         };
+
+        // Shopping cart functionality
+        let cart = {};
 
         function addToCart(productType) {
             if (!cart[productType]) {
@@ -489,18 +457,18 @@
 
             try {
                 // Create line items from cart
-                const lineItems = Object.entries(cart).map(([type, quantity]) => ({
+                const line_items = Object.entries(cart).map(([type, quantity]) => ({
                     price: products[type].priceId,
                     quantity: quantity
                 }));
 
                 // Call Netlify Function to create checkout session
-                const response = await fetch('/.netlify/functions/create-checkout', {
+                const response = await fetch('/.netlify/functions/create-checkout-session', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ lineItems })
+                    body: JSON.stringify({ line_items })
                 });
 
                 if (!response.ok) {
@@ -508,8 +476,16 @@
                     throw new Error(error.message || 'Failed to create checkout session');
                 }
 
-                const { url } = await response.json();
-                window.location.href = url;
+                const { clientSecret } = await response.json();
+                
+                // Redirect to Stripe Checkout
+                const { error } = await stripe.redirectToCheckout({
+                    clientSecret
+                });
+
+                if (error) {
+                    throw error;
+                }
 
             } catch (error) {
                 console.error('Checkout error:', error);
