@@ -9,3 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 }); 
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const nav = document.createElement('nav');
+    nav.innerHTML = `
+        <a id="home" href="../index.html">[ back to home ] </a><br><br>
+    `;
+    document.body.insertBefore(nav, document.body.firstChild);
+}); 

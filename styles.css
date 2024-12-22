@@ -160,10 +160,12 @@ footer {
     background: #35424a;
     color: #ffffff;
 }
-#logo {
+#home {
     font-size: 1.5rem;
     font-weight: bold;
     text-decoration: none;
+    text-align: left;
+    margin-right: 1000px;
     text-shadow: 0px 0px 3px white;
     font-family: monospace;
     animation-duration:1s;
@@ -177,6 +179,32 @@ footer {
     }
     to {
         color: rgb(0, 200, 0);
+    }
+
+}
+
+#pdhead {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    margin-top: 100px;
+    text-shadow: 0px 0px 3px white;
+    font-family: monospace;
+    animation-duration:1s;
+    animation-name: colorthing;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    }
+    @keyframes colorthing {
+    from {
+        color: rgb(17, 93, 169);
+    }
+    to {
+        color: rgb(255, 255, 255);
     }
 
 }
